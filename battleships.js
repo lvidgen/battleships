@@ -138,5 +138,101 @@
             }
         }	
 		
+		
+		document.getElementById("ships").onclick = function(evt) { 
+		// clicking on "ships" div to place ship
+            if (evt.target.className === "grid-item" && player.placed < player.toplace) {
+                var dtarg = evt.target;
+                var hlpr = document.getElementById("ship");
+                var col = dtarg.id[5];		// get coords of click location
+                var row = Number(dtarg.id.substr(6))
+                var size = player.fleet[ship.type].slots;
+                var ori = document.getElementById("hori").checked ? "h" : "v";
+                var spots = canPlace(col, row, size, ori, player.fleet); // check that ship can be placed there - returns 0 length if no
+                if (spots.length == 0) {
+                    hlpr.style.backgroundColor = "red";
+                    setTimeout(function() {
+                        hlpr.style.backgroundColor = "gray";
+                    }, 500)
+                } else {
+                    for (var i = 0; i < size; i++) {
+                        document.getElementById("ships" + spots[i]).style.backgroundColor = ship.col;
+                    }
+                    hlpr.style.display = "none"; //hide helper div
+                    player.placed++; 
+					ship.btn.disabled = true; //disable button corresponding to this ship
+					document.getElementById("ships").style.pointerEvents="none"; // disable clicks until new ship selected
+					player.fleet[ship.type].coords = spots; // store ship coordinates
+                    document.onmousemove = function() {} // remove onmousemove listener
+                    if (player.toplace == player.placed) { 
+					// done placing ships, show right side game board
+                        document.getElementById("bombs").style.display = "grid";
+						document.getElementById("shipyd").style.display = "none";
+                    }
+                }   
+            }
+        }
+
+
+        function canPlace(col, row, size, ori, fleet) { 
+		// can a ship of this size be placed on that spot?
+            var spots = [],
+                valid = true,
+                colnum = col.charCodeAt() - 65;
+            if (ori == "h") {
+                if (colnum + size > config.size) { 
+				//too close to the side
+                    valid = false;
+                }
+                if (valid) {
+                    for (var i = 0; i < size; i++) { 
+                        var grid = String.fromCharCode(colnum + i + 65) + row;
+                        spots.push(grid)
+                        if (isTaken(fleet, grid).isHit) { 
+						// overlaps with already-placed ships
+                            valid = false;
+                        }
+                    }
+                }
+            } else {
+                if (row + size > config.size + 1) { 
+				//too close to the bottom
+				valid = false;
+                }
+                if (valid) { 
+                    for (var i = 0; i < size; i++) {
+                        var grid = col + (row + i);
+                        spots.push(grid)
+                        if (isTaken(fleet, grid).isHit) { 
+						// overlaps with already-placed ships
+                            valid = false;
+                        }
+                    }
+                }
+            }
+            if (valid) {
+                return spots;
+            } else {
+                return [];
+            }
+        }
+
+        function isTaken(flt, theid) { 
+		// to check if a boat occupies a particular coordinate - for ship placement and can also be for hit detection
+            var boat = "",
+                hit = false;
+            for (a in flt) {
+                if (flt[a].coords.indexOf(theid) != -1) {
+                    hit = true;
+                    boat = a;
+                    break;
+                }
+            }
+            return {
+                isHit: hit,
+                bt: boat
+            }
+        }
+		
 runIt();
 	

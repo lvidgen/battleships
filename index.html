@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+		<div id="ship"></div>
+	<!--start playing area-->
+        <div id="wrapper">
+            <div id="ships" class="grid-container"></div>
+            <div id="bombs" class="grid-container inithide"></div>
+            <div id="shipyd">
+                <input name="orient" type="radio" id="vert">
+                <label for="vert">Vertical</label>
+                <input name="orient" type="radio" checked id="hori">
+                <label for="hori">Horizontal</label>
+                <hr>
+			<div id="shipbtns">
+			</div>	
+            </div>
+            <div id="chat" class="">
+                <div id="cbox"></div>
+                <div id="btchat">
+                    <textarea id="msgs"></textarea><button id="msgbtn">Send</button>
+                </div>
+            </div>
+        </div>
+<!--end playing area-->	
+		    <script src="battleships.js"></script>
+</body>
+</html>

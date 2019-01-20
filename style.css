@@ -1,0 +1,67 @@
+        html, body{
+		height:100%;
+		margin:auto;
+		}
+		.inithide{
+		display:none;	
+		}		
+        .grid-container {
+            display: grid;
+            background-color: black;
+            padding: 10px;
+			margin: auto; 
+            vertical-align: center; 
+        }
+        .grid-item,
+        .coord {
+            background-color: #2196F3;
+            border: 1px solid rgba(0, 0, 0, 0.8);
+            text-align: center;
+			vertical-align: center;
+			display:grid;
+        }
+        #wrapper {
+            display: grid;
+            grid-template-columns: 40% 40% 20%;
+        }
+		#ship {
+            position: absolute;
+            height: 48px;
+            width: 147px;
+            outline: 3px dashed white;
+            opacity: 0.4;
+            background-color: gray;
+            top: 10px;
+            left: 26px;
+            pointer-events: none;
+			display: none;
+        }
+		.inithide{
+		display:none;	
+		}
+		#chat{
+		margin-left:5px;
+		height:100%;
+		}
+		#cbox{
+		border: 1px solid;
+		height:80%;
+		overflow-y: auto;
+		}
+		#msgbtn{
+		background-color:blue;
+		color:white;
+		cursor:pointer;
+		font-size:1vw;
+		}
+		#btchat {
+            display: grid;
+            grid-template-columns: 79% 20%;
+			grid-template-rows:3vw;
+			grid-column-gap:1%;
+        }
+		hr{
+		width:50%;
+		text-align:left;
+		margin-left:0;
+		}

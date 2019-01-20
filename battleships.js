@@ -96,7 +96,47 @@
    
 	   }
 
-		
+	    var rads = document.getElementsByName("orient");	//radio buttons to change between horizontal and vertical ship placement
+        for (var x = 0; x < rads.length; x++) {
+            rads[x].onchange = checkOr;
+        }
+
+
+        document.getElementById("shipyd").onclick = function(evt) { 	
+		//"place ship" button has been clicked - show helper div and move it with mouse movement
+            if (evt.target.className === "placer") {
+				document.getElementById("ships").style.pointerEvents="auto";
+                ship.btn = evt.target;
+                var offset = (config.vcalc / 2) * (document.documentElement.clientWidth / 100);
+                ship.type = ship.btn.value.replace("Place ", "");
+                var hlpr = document.getElementById("ship");
+                hlpr.style.display = "block";
+                hlpr.style.left = evt.pageX - offset + "px";
+                hlpr.style.top = evt.pageY - offset + "px";
+                checkOr();
+
+                document.onmousemove = function(evt) {
+                    hlpr.style.left = evt.pageX - offset + "px";
+                    hlpr.style.top = evt.pageY - offset + "px";
+
+                }
+            }
+        }
+
+        function checkOr() {	
+		// to switch helper div orientation between vertical and horizontal
+            var hlpr = document.getElementById("ship"),
+                x = config.vcalc + "vw",
+                y = (player.fleet[ship.type].slots * config.vcalc) * .98 + "vw";
+
+            if (document.getElementById("hori").checked) {
+                hlpr.style.height = x;
+                hlpr.style.width = y;
+            } else {
+                hlpr.style.height = y;
+                hlpr.style.width = x;
+            }
+        }	
 		
 runIt();
 	

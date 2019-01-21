@@ -244,6 +244,7 @@
                         type: "shot",
                         coords: theid
                     })
+				getHit(theid,"pl1",player)	
 			}
         }
 		
@@ -280,6 +281,43 @@
 				enterChat();
 			}
 		}
+		
+		function getHit(theid, who, targ) { // receive a hit, iterate over fleet coordinates 
+            var thediv = document.getElementById("ships" + theid),
+                flt = targ.fleet,
+                res = isTaken(flt, theid),
+                hit = res.isHit,
+                sunk = false,
+                slots = [];
+				placeDot("ships" + theid, hit);
+				placeDot("bombs" + theid, hit);
+            if (hit) {
+                flt[res.bt].hits++; 
+                if (flt[res.bt].hits === flt[res.bt].slots) { 
+				// ship has been sunk 
+                    var txt = targ.name + "'s " + res.bt + " has been sunk!";
+                    sunk = true;
+                    slots = flt[res.bt].coords;
+					postChat("sys", txt);
+                    targ.sunk++;
+                    if (targ.sunk == player.toplace) { 
+					// all ships have been sunk
+                        var txt = targ.name + " loses!" 
+                        postChat("sys", txt)  // post direct to chat if playing vs comp 
+                        endGame(targ.name == player.name); // did the player lose or was it the comp?
+                        config.gameon = false;
+                    }
+                }
+            }
+        }
+
+        function placeDot(idstr, hit) { 
+		// places dot coloured depending on hit or miss
+            var mydiv = document.createElement("div");
+            mydiv.className = "dot";
+            mydiv.style.backgroundColor = hit ? "red" : "white";
+            document.getElementById(idstr).appendChild(mydiv);
+        }
 		
 runIt();
 	

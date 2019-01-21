@@ -65,3 +65,9 @@
 		text-align:left;
 		margin-left:0;
 		}
+		.dot{
+		height:60%;
+		width:60%;
+	    margin:auto;
+		border-radius:50%;
+		}

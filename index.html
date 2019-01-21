@@ -6,8 +6,52 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+	<!--start modal markup-->
+    <div id="blanket"> 
+        <div id="loader">
+			<p id="connmess" >&nbsp;</p>
+            <div id="welcome">
+                <p>Welcome to Battleship Royale</p>
+                <p>Please enter your name:</p>
+                <div><input id="nm"> </div>
+                <div id="plselect"><input class="plbutton" type="button" id="plsub" value="Player vs. Player"><input class="plbutton" type="button" id="pcsub" value="Player vs. Computer"></div>
+            </div>
+            <div id="sizesel" class="inithide"> 
+                <p>Please select grid size(10 to 50 squares):</p>
+                <input type="number" id="gsize" min=10 max=50><input type="button" id="runbtn" value="Go!">
+            </div>
+			<div id="login" class="inithide">
+				<p id="welc"></p>
+				<p>EITHER send this ID to the other player: <span id="myid"></span></p> 
+				<p>OR enter the ID that the other player sends here: <input id="oppid"/> and click "Connect"</p>
+				<input type="button" value = "Connect" id="gotid"/>
+			</div>
+            <div id="loading" class="inithide">
+                <p id="plone"></p>
+                <progress></progress>
+            </div>
+            <div id="winlose" class="inithide">
+                <div id="endmess"></div>
+				<div>Would you like to play again?</div>
+				<div id="endbtns">
+				<input class="plbutton" type="button" id="norepl" value="No, thanks"><input class="plbutton" type="button" id="yesrepl" value="OK">
+				</div>
+            </div>
+			<div id="replay" class="inithide">
+                <p id="rewelc"></p>
+                <p>Please choose game mode:</p>
+                <div id="replselect"><input class="plbutton" type="button" id="replsub" value="Player vs. Player"><input class="plbutton" type="button" id="repcsub" value="Player vs. Computer"></div>
+            </div>
+        </div>
+    </div>
+	<!--end modal markup-->
 		<div id="ship"></div>
 	<!--start playing area-->
+	<div id="outer" class="inithide">
+        <div id="players">
+            <div id="p1" class="plyr">Player 1</div><span id="vs">vs.</span>
+            <div id="p2" class="plyr">Player 2</div>
+        </div>
         <div id="wrapper">
             <div id="ships" class="grid-container"></div>
             <div id="bombs" class="grid-container inithide"></div>
@@ -27,7 +71,9 @@
                 </div>
             </div>
         </div>
+	</div>	
 <!--end playing area-->	
-		    <script src="battleships.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/0.3.18/peer.js"></script>
+	<script src="battleships.js"></script>
 </body>
 </html>

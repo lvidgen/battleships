@@ -1,22 +1,169 @@
-        var player, 			
+        var peer = null,
+			player, 			
 			ship={type:"Sub",
 					btn:null,
 					col:"gray"},
-			config={size:10,
-					vcalc:3, 
-					gameon:true
+			config={size:0,
+					vcalc:0,
+					gameon:true,
+					p2ready:false,
+					opp:"Player 2"
 					};
+	
+        document.getElementById("plselect").onclick = function(evt) {  
+		//get user's name
+            if (evt.target.className === "plbutton") {
+                var val = document.getElementById("nm").value;
+                var nm = val == "" ? "Anonymous" : val;
+				player = new makeFleet(nm);
+                document.getElementById("p1").innerHTML = player.name;
+                if (evt.target.id === "plsub") { 
+				makeConn();				
+			} else { 
+			//playing vs. computer
+
+                }
+            }
+        }
+		
+		function makeConn(){
+							//playing vs. player -set up the peer connection
+                    peer = new Peer({
+                        debug: 2,
+                        serialization: "json"
+                    });
+					
+					peer.conn = null;
+                    
+                    peer.on('open', function(id) {
+						// Show this peer's ID
+						document.getElementById("welcome").style.display = "none";
+						document.getElementById("login").style.display="block";
+						document.getElementById("welc").innerHTML="Welcome, " + player.name;
+						document.getElementById("myid").innerHTML=peer.id;
+                    });
+
+                    // Await connections from others
+                    peer.on('connection', connect);
+
+                    peer.on('error', function(err) {
+                        if (err.type == 'disconnected') {
+                            console.log("disconnected")
+                        }
+                        if (err.type == 'network') {
+                            console.log("server. refresh")
+                        }
+                        if (err.type == 'browser-incompatible') {
+							killSwitch();
+                        }
+                    })
+				if (!util.supports.data){
+							killSwitch();
+				}
+		}
+		
+		document.getElementById("gotid").onclick=function(){
+			// the other player sent us their ID
+			document.getElementById("login").style.display = "none";
+			var theval=document.getElementById("oppid").value;
+			if(theval!=""){
+				player.one = true;
+				dirconnect(theval);	
+			}	
+		}
+		
+		function killSwitch(){
+			document.getElementById("loader").style.display = "none";
+            alert("Your browser does not support the WebRTC protocol. \nWe suggest using Chrome or Firefox.");
+		}
+
+        
+        function connect(c) {
+			// Handle a connection object.
+            peer.conn = c;
+            sendIt({
+                "type": "conn",
+                "name": player.name
+            });
+			if(!player.one){
+				
+			}
+            // Handle a chat connection.
+            if (c.label === 'chat') {
+                // Just to fix the connection receiver to successfully send a message to the connection requester
+                c.open = true;
+                c.on('data', function(data) {
+                    getData(data);
+                });
+                c.on('close', function() {
+					postChat("sys", config.opp + ' has closed the connection.');
+					peer.conn=null;
+                });
+            }
+        }
+
+        
+        function dirconnect(id) {
+			// Connect to a peer
+            var requestedPeer = id;
+            if (!peer.conn) {
+                var c = peer.connect(requestedPeer, {
+                    label: 'chat',
+                    serialization: 'json',
+                    metadata: {
+                        message: 'hi i want to chat with you!'
+                    }
+                });
+                c.on('open', function() {
+                    connect(c);
+                });
+                c.on('error', function(err) {
+					postChat("sys", err)
+                });
+            }
+			showSizeSel();
+        }
+
+        // Make sure things clean up properly.
+
+        window.onunload = window.onbeforeunload = function(e) {
+            if (!!peer && !peer.destroyed) {
+                peer.destroy();
+            }
+        };
+
+
+        function showSizeSel() {	
+		// show the grid size selection dialog
+            document.getElementById("welcome").style.display = "none";
+            document.getElementById("sizesel").style.display = "block";
+        }
+		
+				
+		document.getElementById("runbtn").onclick = runIt;
+		
+		document.getElementById("gsize").onkeypress = function(evt){
+			  if (event.keyCode === 13) {
+				runIt();
+			}
+		}
+	
 		
 		function makeBoard() {		
-		for (a in player.fleet) {		
-		// make buttons for placing ships
-            var btn = document.createElement("input");
-            btn.type = "button";
-            btn.value = "Place " + a;
-            btn.className = "placer";
-            document.getElementById("shipbtns").appendChild(btn)
-            document.getElementById("shipbtns").appendChild(document.createElement("hr"))
-        }
+			for (a in player.fleet) {		
+			// make buttons for placing ships
+				var btn = document.createElement("input");
+				btn.type = "button";
+				btn.value = "Place " + a;
+				btn.className = "placer";
+				document.getElementById("shipbtns").appendChild(btn);
+				document.getElementById("shipbtns").appendChild(document.createElement("hr"))
+			}
+            document.getElementById("outer").style.display = "block";
+			document.getElementById("wrapper").style.display = "grid";
+			document.getElementById("bombs").style.display = "none";
+			document.getElementById("shipyd").style.display = "block";
+            document.getElementById("blanket").style.display = "none";
             setUp("ships");
             setUp("bombs");
         }
@@ -58,9 +205,23 @@
         }
 
 		function runIt() {
-			player = new makeFleet("Player 1");			
+			player = new makeFleet("Player 1");	
+			var min=10, max=50;
+			config.size = Number(document.getElementById("gsize").value);
+            if (config.size > max) {
+                config.size = max;
+            }
+            if (config.size < min) {
+                config.size = min;
+            }
+            config.vcalc = 30 / config.size; // helper calc. for getting widths right			
             makeBoard();
-                }
+			// send config.size to player 2 for their setup
+                peer.conn.send({
+                    type: "gsize",
+                    gs: config.size
+                })
+            }
 
         function setUp(dv) {
             document.getElementById(dv).style.gridTemplateColumns = "repeat(" + (config.size + 1) + "," + config.vcalc + "vw)";
@@ -249,7 +410,7 @@
         }
 		
 		function sendIt(data) {
-            console.log(data);
+            peer.conn.send(data);
         }
 		
 		
@@ -310,7 +471,11 @@
                 }
             }
         }
-
+		
+		function endGame(){
+			
+		}
+		
         function placeDot(idstr, hit) { 
 		// places dot coloured depending on hit or miss
             var mydiv = document.createElement("div");
@@ -319,5 +484,34 @@
             document.getElementById(idstr).appendChild(mydiv);
         }
 		
-runIt();
-	
+		function waitConfig(){
+		document.getElementById("plone").innerHTML = "Receiving game configuration from "+config.opp+"...";	
+		document.getElementById("loading").style.display = "block";	
+		}
+
+		function getData(data) { 
+		// data received...
+            switch (data.type) {
+			case "conn": 
+				// connection established, exchange names
+                    config.opp = data.name;
+		            document.getElementById("connmess").innerHTML = config.opp + " has connected";
+					document.getElementById("connmess").style.visibility = "visible";
+                    document.getElementById("p2").innerHTML = config.opp;
+                    if (!player.one) {
+					document.getElementById("login").style.display = "none";	
+                        peer.conn.send({
+                            type: "conn",
+                            name: player.name
+                        });
+					waitConfig();	
+                    }
+                    break;
+                case "gsize": 
+				// player 1 has sent grid size info to player 2
+                    config.size = data.gs;
+                    config.vcalc = 30 / config.size;
+                    makeBoard();
+                    break;
+            }
+        }

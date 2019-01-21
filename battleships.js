@@ -3,7 +3,8 @@
 					btn:null,
 					col:"gray"},
 			config={size:10,
-					vcalc:3
+					vcalc:3, 
+					gameon:true
 					};
 		
 		function makeBoard() {		
@@ -232,6 +233,22 @@
                 isHit: hit,
                 bt: boat
             }
+        }
+		
+		document.getElementById("bombs").onclick = function(evt) { 
+            if (evt.target.style.cursor === "crosshair" && config.gameon) {
+                evt.target.style.cursor = "no-drop";
+                var theid = evt.target.id.replace("bombs", "");
+				// drop bomb - get coordinates of click and send them
+                    sendIt({
+                        type: "shot",
+                        coords: theid
+                    })
+			}
+        }
+		
+		function sendIt(data) {
+            console.log(data);
         }
 		
 runIt();

@@ -251,5 +251,35 @@
             console.log(data);
         }
 		
+		
+        function postChat(plr, msg) { 
+		// for posting directly to own chat
+            var thediv = document.createElement("div"),
+				me = player.name,
+                cls = {
+                    sys: "red"
+                }
+			cls[me]="black";	
+			cls[config.opp]="blue";	
+            thediv.style.color = cls[plr];
+            thediv.appendChild(document.createTextNode(plr + ": " + msg));
+            document.getElementById("cbox").appendChild(thediv);
+        }
+		
+		function enterChat() { 
+		// for sending chat to other player
+            var txt = document.getElementById("msgs").value;
+            postChat(player.name, txt);
+            document.getElementById("msgs").value = "";
+        }
+		
+		document.getElementById("msgbtn").onclick = enterChat;
+		
+		document.getElementById("msgs").onkeypress = function(evt){
+			  if (event.keyCode === 13) {
+				enterChat();
+			}
+		}
+		
 runIt();
 	

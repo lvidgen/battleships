@@ -6,6 +6,7 @@
 			config={size:0,
 					vcalc:0,
 					gameon:true,
+					plyrone:false,
 					p2ready:false,
 					opp:"Player 2"
 					};
@@ -67,7 +68,7 @@
 			document.getElementById("login").style.display = "none";
 			var theval=document.getElementById("oppid").value;
 			if(theval!=""){
-				player.one = true;
+				config.plyrone = true;
 				dirconnect(theval);	
 			}	
 		}
@@ -85,7 +86,7 @@
                 "type": "conn",
                 "name": player.name
             });
-			if(!player.one){
+			if(!config.plyrone){
 				
 			}
             // Handle a chat connection.
@@ -150,8 +151,14 @@
 	
 		
 		function makeBoard() {	
+			config.gameon = true;
             document.getElementById("status").style.visibility = "visible";
-			document.getElementById("status").innerHTML="Please place your ships..."		
+			document.getElementById("status").innerHTML="Please place your ships..."
+            document.getElementById("outer").style.display = "block";
+			document.getElementById("wrapper").style.display = "grid";
+			document.getElementById("bombs").style.display = "none";
+			document.getElementById("shipyd").style.display = "block";
+            document.getElementById("blanket").style.display = "none";
 			for (a in player.fleet) {		
 			// make buttons for placing ships
 				var btn = document.createElement("input");
@@ -161,11 +168,8 @@
 				document.getElementById("shipbtns").appendChild(btn);
 				document.getElementById("shipbtns").appendChild(document.createElement("hr"))
 			}
-            document.getElementById("outer").style.display = "block";
-			document.getElementById("wrapper").style.display = "grid";
-			document.getElementById("bombs").style.display = "none";
-			document.getElementById("shipyd").style.display = "block";
-            document.getElementById("blanket").style.display = "none";
+			document.getElementById("ships").innerHTML="";
+			document.getElementById("bombs").innerHTML="";
             setUp("ships");
             setUp("bombs");
         }
@@ -187,12 +191,12 @@
                         hits: 0,
                         slots: 3,
                         coords: []
-                    },*/
+                    },
                     Sub: {
                         hits: 0,
                         slots: 3,
                         coords: []
-                    },
+                    },*/
                     Destroyer: {
                         hits: 0,
                         slots: 2,
@@ -333,7 +337,7 @@
                         document.getElementById("bombs").style.display = "grid";
 						document.getElementById("shipyd").style.display = "none";
 						document.getElementById("bombs").style.pointerEvents = "none";
-                        if (player.one) {
+                        if (config.plyrone) {
                             if (config.p2ready) { 
 							// player 2 has already placed ships, or playing against computer, so ready to play 
                                 goPlayerOne();
@@ -529,14 +533,45 @@
 		// show end dialog
 			document.getElementById("connmess").style.visibility = "hidden";
 			document.getElementById("status").style.visibility = "hidden";
-			document.getElementById("players").style.visibility = "hidden";
 			document.getElementById("loading").style.display = "none";
             document.getElementById("sizesel").style.display = "none";
             document.getElementById("blanket").style.display = "block";
             document.getElementById("winlose").style.display = "block";
+			document.getElementById("cbox").innerHTML="";
+			document.getElementById("shipbtns").innerHTML="";
+			document.getElementById("wrapper").style.display = "none";
+			document.getElementById("players").style.visibility = "hidden";			
             document.getElementById("endmess").innerHTML = ilose ? "<p>" + config.opp + " wins. </p><p>Please don't be sad. It's just a game</p>" : "<p>" + player.name + " wins! Congratulations. </p><p>Please don't gloat. Be like Mike</p>";
-        }
-
+			config.plyrone=!config.plyrone;
+			var me = player.name;
+			player = new makeFleet(me);
+		}
+		
+		document.getElementById("endbtns").onclick = function(evt) { 
+            if (evt.target.id === "norepl") {
+				if(peer){
+					peer.conn.close();
+				}
+				location.href="https://www.google.com";
+			} else {
+				document.getElementById("winlose").style.display = "none";
+				document.getElementById("replay").style.display = "block";
+				document.getElementById("rewelc").innerHTML="Welcome back, " + player.name +"!";
+			}
+		}	
+		
+		document.getElementById("replselect").onclick = function(evt) {	
+		config.p2ready=false;
+		document.getElementById("replay").style.display = "none";
+			if (evt.target.id === "replsub") {
+					if(config.plyrone){
+						waitConfig();
+					} else {
+						showSizeSel();
+					}	
+			}
+		}
+		
 		
         function placeDot(idstr, hit) { 
 		// places dot coloured depending on hit or miss
@@ -579,7 +614,7 @@
 		            document.getElementById("connmess").innerHTML = config.opp + " has connected";
 					document.getElementById("connmess").style.visibility = "visible";
                     document.getElementById("p2").innerHTML = config.opp;
-                    if (!player.one) {
+                    if (!config.plyrone) {
 					document.getElementById("login").style.display = "none";	
                         peer.conn.send({
                             type: "conn",

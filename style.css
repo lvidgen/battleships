@@ -32,6 +32,12 @@
 		#gsize{
 		margin-right:1vh;
 		}
+		#headline{
+			font-size:6em;
+			text-align:center;
+			padding:1rem;
+			font-family: Stencil, Rockwell, "Courier Bold", Courier, Georgia, Times;
+		}
 		#players{
 			font-size:2vw;
 			padding:1rem;

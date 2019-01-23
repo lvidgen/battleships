@@ -149,7 +149,9 @@
 		}
 	
 		
-		function makeBoard() {		
+		function makeBoard() {	
+            document.getElementById("status").style.visibility = "visible";
+			document.getElementById("status").innerHTML="Please place your ships..."		
 			for (a in player.fleet) {		
 			// make buttons for placing ships
 				var btn = document.createElement("input");
@@ -329,7 +331,25 @@
 					// done placing ships, show right side game board
                         document.getElementById("bombs").style.display = "grid";
 						document.getElementById("shipyd").style.display = "none";
-                    }
+						document.getElementById("bombs").style.pointerEvents = "none";
+                        if (player.one) {
+                            if (config.p2ready) { 
+							// player 2 has already placed ships, or playing against computer, so ready to play 
+                                goPlayerOne();
+                            } else {
+                                document.getElementById("status").innerHTML = "Waiting for " + config.opp + " to place ships";
+                            }
+                        } else { 
+						// player 2, so send msg to player 1 that ships have been placed
+                            sendIt({
+                                type: "p2ready",
+                                deets: true
+                            })
+                            document.getElementById("status").innerHTML = config.opp + " to shoot. Please wait...";
+                            document.getElementById("p2").className = "plyr on";
+                        }
+						document.getElementById("players").style.visibility = "visible";
+					}
                 }   
             }
         }
@@ -399,12 +419,12 @@
             if (evt.target.style.cursor === "crosshair" && config.gameon) {
                 evt.target.style.cursor = "no-drop";
                 var theid = evt.target.id.replace("bombs", "");
+	            togglePlayer(false);			
 				// drop bomb - get coordinates of click and send them
                     sendIt({
                         type: "shot",
                         coords: theid
-                    })
-				getHit(theid,"pl1",player)	
+                    })	
 			}
         }
 		
@@ -457,8 +477,6 @@
                 hit = res.isHit,
                 sunk = false,
                 slots = [];
-				placeDot("ships" + theid, hit);
-				placeDot("bombs" + theid, hit);
             if (hit) {
                 flt[res.bt].hits++; 
                 if (flt[res.bt].hits === flt[res.bt].slots) { 
@@ -477,6 +495,20 @@
                     }
                 }
             }
+		    if (who != "pl1") {
+				// other player fired
+                placeDot("ships" + theid, hit); 
+            } else {
+				// this player fired
+                placeDot("bombs" + theid, hit); 
+            }
+            if (peer) {
+                sendIt({ 	// tell other player if hit or miss 
+                    type: "res",
+                    coords: "bombs" + theid,
+                    hit: hit
+                })
+            }	
         }
 		
 		function endGame(){
@@ -495,6 +527,25 @@
 		document.getElementById("plone").innerHTML = "Receiving game configuration from "+config.opp+"...";	
 		document.getElementById("loading").style.display = "block";	
 		}
+		
+        function goPlayerOne() { 
+		// setup for player 1	
+            if (player.toplace == player.placed) {
+			togglePlayer(true);
+            }
+        }
+		
+        function togglePlayer(isme) { 
+		// toggle player indicator and text
+            var statid = document.getElementById("status"),
+                bdiv = document.getElementById("bombs"),
+                onstr = "plyr on",
+                offstr = "plyr";
+            bdiv.style.pointerEvents = isme ? "auto" : "none";
+            document.getElementById("p1").className = isme ? onstr : offstr;
+            document.getElementById("p2").className = isme ? offstr : onstr;
+            statid.innerHTML = isme ? player.name + " to shoot. Fire away!" : config.opp + " to shoot. Please wait...";
+        }
 
 		function getData(data) { 
 		// data received...
@@ -522,6 +573,20 @@
                     break;
 			case "chat": // chat
                     postChat(data.sndr, data.msg)
-                    break;		
+                    break;
+			case "p2ready": 
+				// player 2 has finished placing ships
+                    config.p2ready = true;
+                    goPlayerOne();
+                    break;	
+            case "shot": 
+				// other player has sent shot
+                    getHit(data.coords, "pl2", player);
+                    togglePlayer(true);
+                    break;
+            case "res": 
+				// other player has sent results of this player's shot
+                    placeDot(data.coords, data.hit);
+                    break;					
             }
         }

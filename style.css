@@ -44,6 +44,20 @@
 		margin:1rem;
 		width:10vw;
 		display:inline-block
+		}
+		.on{
+		background-color:LightGreen;
+		color:white;
+		}
+		.off{
+		background-color:white;
+		color:black;
+		}	
+		#status{
+			text-align:center;
+			margin:1rem;
+			font-size:1.5em;
+			visibility:hidden;
 		}		
         .grid-container {
             display: grid;
@@ -75,6 +89,9 @@
             left: 26px;
             pointer-events: none;
 			display: none;
+        }
+		#ships {
+            pointer-events: none;
         }
 		.inithide{
 		display:none;	

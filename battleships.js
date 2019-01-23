@@ -170,8 +170,9 @@
             setUp("bombs");
         }
 
-        function makeFleet(nm) {		// object factory for player & comp fleets
-            this.fleet = { 
+        function makeFleet(nm) {		
+		// object factory for player & comp fleets
+            this.fleet = { /*
                     Carrier: {
                         hits: 0,
                         slots: 5,
@@ -186,7 +187,7 @@
                         hits: 0,
                         slots: 3,
                         coords: []
-                    },
+                    },*/
                     Sub: {
                         hits: 0,
                         slots: 3,
@@ -196,7 +197,7 @@
                         hits: 0,
                         slots: 2,
                         coords: []
-                    }
+                    } 
                 },
             this.shotstaken = [];
 			this.placed=0;
@@ -470,7 +471,8 @@
 			}
 		}
 		
-		function getHit(theid, who, targ) { // receive a hit, iterate over fleet coordinates 
+		function getHit(theid, who, targ) { 
+		// receive a hit, iterate over fleet coordinates 
             var thediv = document.getElementById("ships" + theid),
                 flt = targ.fleet,
                 res = isTaken(flt, theid),
@@ -486,9 +488,20 @@
                     slots = flt[res.bt].coords;
 					postChat("sys", txt);
                     targ.sunk++;
-                    if (targ.sunk == player.toplace) { 
+                     if (targ.sunk == player.toplace) { 
 					// all ships have been sunk
-                        var txt = targ.name + " loses!" 
+                        var txt = targ.name + " loses!"
+                        if (peer) {
+                            sendIt({  // send notification to other player
+                                type: "chat",
+                                sndr: "sys",
+                                msg: txt
+                            })
+                            sendIt({
+                                type: "end",
+                                lost: true
+                            })
+                        } 
                         postChat("sys", txt)  // post direct to chat if playing vs comp 
                         endGame(targ.name == player.name); // did the player lose or was it the comp?
                         config.gameon = false;
@@ -511,9 +524,19 @@
             }	
         }
 		
-		function endGame(){
-			
-		}
+		
+        function endGame(ilose) { 
+		// show end dialog
+			document.getElementById("connmess").style.visibility = "hidden";
+			document.getElementById("status").style.visibility = "hidden";
+			document.getElementById("players").style.visibility = "hidden";
+			document.getElementById("loading").style.display = "none";
+            document.getElementById("sizesel").style.display = "none";
+            document.getElementById("blanket").style.display = "block";
+            document.getElementById("winlose").style.display = "block";
+            document.getElementById("endmess").innerHTML = ilose ? "<p>" + config.opp + " wins. </p><p>Please don't be sad. It's just a game</p>" : "<p>" + player.name + " wins! Congratulations. </p><p>Please don't gloat. Be like Mike</p>";
+        }
+
 		
         function placeDot(idstr, hit) { 
 		// places dot coloured depending on hit or miss
@@ -587,6 +610,11 @@
             case "res": 
 				// other player has sent results of this player's shot
                     placeDot(data.coords, data.hit);
+                    break;
+            case "end": 
+				// player 2 has lost
+                    endGame(false);
+                    config.gameon = false;
                     break;					
             }
         }

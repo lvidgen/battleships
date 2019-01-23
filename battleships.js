@@ -204,8 +204,7 @@
 			this.one=false;
         }
 
-		function runIt() {
-			player = new makeFleet("Player 1");	
+		function runIt() {	
 			var min=10, max=50;
 			config.size = Number(document.getElementById("gsize").value);
             if (config.size > max) {
@@ -427,11 +426,19 @@
             thediv.appendChild(document.createTextNode(plr + ": " + msg));
             document.getElementById("cbox").appendChild(thediv);
         }
-		
-		function enterChat() { 
+
+        function enterChat() { 
 		// for sending chat to other player
-            var txt = document.getElementById("msgs").value;
+            var txt = document.getElementById("msgs").value,
+                theobj = {
+                    sndr: player.name,
+                    type: "chat",
+                    msg: txt
+                }
             postChat(player.name, txt);
+            if (peer.conn) {
+                sendIt(theobj);
+            }
             document.getElementById("msgs").value = "";
         }
 		
@@ -507,11 +514,14 @@
 					waitConfig();	
                     }
                     break;
-                case "gsize": 
+            case "gsize": 
 				// player 1 has sent grid size info to player 2
                     config.size = data.gs;
                     config.vcalc = 30 / config.size;
                     makeBoard();
                     break;
+			case "chat": // chat
+                    postChat(data.sndr, data.msg)
+                    break;		
             }
         }

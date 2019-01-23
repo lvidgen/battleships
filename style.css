@@ -105,6 +105,9 @@
 		text-align:left;
 		margin-left:0;
 		}
+		.plbutton{
+		margin:1vh;
+		}
 		.dot{
 		height:60%;
 		width:60%;

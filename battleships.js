@@ -1,4 +1,5 @@
         var peer = null,
+			comp = null,
 			player, 			
 			ship={type:"Sub",
 					btn:null,
@@ -22,7 +23,9 @@
 				makeConn();				
 			} else { 
 			//playing vs. computer
-
+					document.getElementById("loading").style.display = "none";
+					config.plyrone = true;
+                    showSizeSel();
                 }
             }
         }
@@ -208,7 +211,6 @@
 			this.toplace=Object.keys(this.fleet).length;
             this.sunk = 0;
             this.name = nm;
-			this.one=false;
         }
 
 		function runIt() {	
@@ -222,12 +224,19 @@
             }
             config.vcalc = 30 / config.size; // helper calc. for getting widths right			
             makeBoard();
+            if (!peer) {
+			//make computer player object
+                comp = new makeFleet("Computer");
+                config.opp = comp.name;
+                document.getElementById("p2").innerHTML = config.opp;
+			} else {
 			// send config.size to player 2 for their setup
                 peer.conn.send({
                     type: "gsize",
                     gs: config.size
                 })
             }
+		}	
 
         function setUp(dv) {
             document.getElementById(dv).style.gridTemplateColumns = "repeat(" + (config.size + 1) + "," + config.vcalc + "vw)";

@@ -379,7 +379,10 @@
                         document.getElementById("bombs").style.display = "grid";
 						document.getElementById("shipyd").style.display = "none";
 						document.getElementById("bombs").style.pointerEvents = "none";
-                        if (config.plyrone) {
+                        if (comp) {
+                            document.getElementById("cheatwrap").style.visibility = "visible"; // show "cheat mode" checkbox
+                        }
+						if (config.plyrone) {
                             if (config.p2ready || comp) { 
 							// player 2 has already placed ships, or playing against computer, so ready to play 
                                 goPlayerOne();
@@ -400,7 +403,19 @@
                 }   
             }
         }
-
+		
+        document.getElementById("cheat").onchange = function() { 
+		// show comp fleet
+            var ischk = this.checked;
+            for (a in comp.fleet) {
+                var arr = comp.fleet[a].coords,
+                    len = arr.length,
+                    i = 0;
+                for (i; i < len; i++) {
+                    document.getElementById("bombs" + arr[i]).style.border = ischk ? "dotted" : "1px solid";
+                }
+            }
+        }
 
         function canPlace(col, row, size, ori, fleet) { 
 		// can a ship of this size be placed on that spot?

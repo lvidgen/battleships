@@ -123,6 +123,9 @@
 			grid-template-rows:3vw;
 			grid-column-gap:1%;
         }
+		#cheatwrap{
+		visibility:hidden;
+		}
 		hr{
 		width:50%;
 		text-align:left;

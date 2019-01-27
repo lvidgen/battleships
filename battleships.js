@@ -227,6 +227,7 @@
                 comp = new makeFleet("Computer");
                 config.opp = comp.name;
                 document.getElementById("p2").innerHTML = config.opp;
+				comp.hits = [];
 				compShips();
 			} else {
 			// send config.size to player 2 for their setup
@@ -249,6 +250,7 @@
                 comp.fleet[boat].coords = tmp;
             }
         }
+		
 		
         function trySpot(size, fleet) { 
 		//randomly generate coordinates to try to place ships 
@@ -461,13 +463,48 @@
             if (evt.target.style.cursor === "crosshair" && config.gameon) {
                 evt.target.style.cursor = "no-drop";
                 var theid = evt.target.id.replace("bombs", "");
-	            togglePlayer(false);			
+	            togglePlayer(false);
+                if (comp) { 
+				// playing vs computer - check if hit, then computer shoots after waiting a bit
+                    getHit(theid, "pl1", comp);
+                    var wait = Math.random() * 2000;
+                    setTimeout(compShot, wait);
+                } else { 				
 				// drop bomb - get coordinates of click and send them
                     sendIt({
                         type: "shot",
                         coords: theid
                     })	
+				}
 			}
+        }
+		
+		
+        function compShot() {
+            if (config.gameon) {
+                    var poss = randCoord();
+                if (comp.shotstaken.indexOf(poss) == -1) { 
+				    //hasn't been tried before
+                    comp.shotstaken.push(poss);
+                    var shot = getHit(poss, "comp", player);
+                    if (shot.res) {    
+						comp.hits.push(poss); // store successful hits
+                    if (shot.snk) {
+                        for (var i = 0; i < shot.slts.length; i++) {
+                            if (comp.hits.includes(shot.slts[i])) {
+								 // remove sunk ship's coords from hits list
+                                comp.hits.splice(comp.hits.indexOf(shot.slts[i]), 1)
+                            }
+                        }
+                    }                
+                }
+
+				} else {
+				compShot();
+				return;
+				}
+            togglePlayer(true);	
+            }
         }
 		
 		function sendIt(data) {
@@ -563,7 +600,22 @@
                     hit: hit
                 })
             }	
-        }
+                    if (who == 'comp') { 
+			/* hack for letting comp calculate where the sunk boat was
+			   we could make this more 'human' by getting the first and last comp.hits, 
+			   calculating orientation based on if the letters in the 
+			   coords are the same and counting back from the last hit by 
+			   the amount of slots in the ship, but really...	
+			*/
+                return {
+                    id: theid,
+                    res: hit,
+                    snk: sunk,
+                    slts: slots
+                }
+            }
+		
+		}
 		
 		
         function endGame(ilose) { 

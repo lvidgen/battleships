@@ -220,6 +220,7 @@
             if (config.size < min) {
                 config.size = min;
             }
+			config.size = 4;
             config.vcalc = 30 / config.size; // helper calc. for getting widths right			
             makeBoard();
             if (!peer) {
@@ -228,6 +229,8 @@
                 config.opp = comp.name;
                 document.getElementById("p2").innerHTML = config.opp;
 				comp.hits = [];
+				comp.dirs = ["e", "n", "w", "s"];
+                comp.dir = "e";
 				compShips();
 			} else {
 			// send config.size to player 2 for their setup
@@ -479,16 +482,39 @@
 			}
         }
 		
-		
         function compShot() {
+			var aimshot=true; //not a random guess
             if (config.gameon) {
+                if (comp.hits.length == 0) {
                     var poss = randCoord();
+					aimshot=false;
+                } else {
+                    if (!comp.dir) {
+                        changeDir();
+                    }
+                    if (comp.poss[comp.dir].length == 0) { 
+					// dead end - change direction
+                        changeDir();
+                        compShot();
+                        return;
+                    }
+                    var poss = comp.poss[comp.dir].shift();
+                }
                 if (comp.shotstaken.indexOf(poss) == -1) { 
 				    //hasn't been tried before
                     comp.shotstaken.push(poss);
                     var shot = getHit(poss, "comp", player);
                     if (shot.res) {    
+                        if (comp.hits.length == 0) { 
+						// unique hit - store as pivot
+                            calcPoss(poss)
+                        }
 						comp.hits.push(poss); // store successful hits
+                    } else {
+						if(aimshot){
+							comp.poss[comp.dir].length = 0;
+						}
+					}
                     if (shot.snk) {
                         for (var i = 0; i < shot.slts.length; i++) {
                             if (comp.hits.includes(shot.slts[i])) {
@@ -496,16 +522,66 @@
                                 comp.hits.splice(comp.hits.indexOf(shot.slts[i]), 1)
                             }
                         }
-                    }                
+                        if (comp.hits.length > 0) {
+							 // if more pivots available, calculate the likely hits for first one
+                            calcPoss(comp.hits[0])
+                        }
+                        comp.dir = null;
+                        togglePlayer(true);
+                        return;
+                    }
+                    togglePlayer(true);
+                } else {
+					if(aimshot){
+						// spot has already been tried - dead end
+						comp.poss[comp.dir].length = 0; 
+					}
+                    compShot();
                 }
-
-				} else {
-				compShot();
-				return;
-				}
-            togglePlayer(true);	
             }
         }
+
+        function changeDir() {
+            if (!comp.dir) {
+				// random direction
+                comp.dir = comp.dirs[Math.floor(Math.random() * comp.dirs.length)]; 
+            } else {
+				 // pivot 180 degrees
+                comp.dir = comp.dirs[(comp.dirs.indexOf(comp.dir) + 2) % 4];
+                if (comp.poss[comp.dir].length == 0){
+				 // pivot 90 degrees	
+                    comp.dir = comp.dirs[(comp.dirs.indexOf(comp.dir) + 1) % 4];
+				}
+            }
+        }
+
+        function calcPoss(anc) {
+            var we = [],
+                ns = [],
+                ltr = anc[0],
+                num = Number(anc.substring(1));
+            for (var i = 0; i < config.size; i++) {
+                ns.push(ltr + (i + 1)) // get all coordinates in the column of the pivot point
+                we.push(String.fromCharCode(65 + i) + num);  // get all coordinates in the row of the pivot point
+            }
+            comp.poss = { 
+			/* store coordinates in ascending order from hit point, so for H5:
+					E5
+					F5
+			        G5 
+			H8,H7,H6  H4,H3,H2 
+					I5
+					J5
+					K5
+			*/
+                n: ns.splice(0, ns.indexOf(anc)).reverse(),
+                s: ns.splice(ns.indexOf(anc) + 1),
+                w: we.splice(0, we.indexOf(anc)).reverse(),
+                e: we.splice(we.indexOf(anc) + 1)
+            }
+            return comp.poss;
+        }
+
 		
 		function sendIt(data) {
             peer.conn.send(data);

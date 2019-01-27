@@ -175,7 +175,7 @@
 
         function makeFleet(nm) {		
 		// object factory for player & comp fleets
-            this.fleet = { /*
+            this.fleet = { 
                     Carrier: {
                         hits: 0,
                         slots: 5,
@@ -195,7 +195,7 @@
                         hits: 0,
                         slots: 3,
                         coords: []
-                    },*/
+                    },
                     Destroyer: {
                         hits: 0,
                         slots: 2,
@@ -218,7 +218,6 @@
             if (config.size < min) {
                 config.size = min;
             }
-			config.size = 4;
             config.vcalc = 30 / config.size; // helper calc. for getting widths right			
             makeBoard();
             if (!peer) {

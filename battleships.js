@@ -80,8 +80,7 @@
 			document.getElementById("loader").style.display = "none";
             alert("Your browser does not support the WebRTC protocol. \nWe suggest using Chrome or Firefox.");
 		}
-
-        
+      
         function connect(c) {
 			// Handle a connection object.
             peer.conn = c;
@@ -100,13 +99,12 @@
                     getData(data);
                 });
                 c.on('close', function() {
-					postChat("sys", config.opp + ' has closed the connection.');
+					alert("The connection has been closed.");
 					peer.conn=null;
                 });
             }
         }
-
-        
+       
         function dirconnect(id) {
 			// Connect to a peer
             var requestedPeer = id;
@@ -720,9 +718,10 @@
 			document.getElementById("cbox").innerHTML="";
 			document.getElementById("shipbtns").innerHTML="";
 			document.getElementById("wrapper").style.display = "none";
-			document.getElementById("players").style.visibility = "hidden";			
+			document.getElementById("players").style.visibility = "hidden";
+			document.getElementById("cheatwrap").style.visibility = "hidden";
+			document.getElementById("cheat").checked = false;			
             document.getElementById("endmess").innerHTML = ilose ? "<p>" + config.opp + " wins. </p><p>Please don't be sad. It's just a game</p>" : "<p>" + player.name + " wins! Congratulations. </p><p>Please don't gloat. Be like Mike</p>";
-			config.plyrone=!config.plyrone;
 			var me = player.name;
 			player = new makeFleet(me);
 		}
@@ -744,11 +743,25 @@
 		config.p2ready=false;
 		document.getElementById("replay").style.display = "none";
 			if (evt.target.id === "replsub") {
+				if (comp){
+					makeConn();
+					comp=null;
+				} else {					
 					if(config.plyrone){
 						waitConfig();
 					} else {
 						showSizeSel();
-					}	
+					}
+				config.plyrone = !config.plyrone;	
+				}
+			} else {
+				// playing vs comp.
+			//	comp = new makeFleet("Computer");
+				if(!comp){
+					peer.conn.close();
+					peer=null;					
+				} 
+			showSizeSel();	
 			}
 		}
 		

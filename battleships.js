@@ -142,8 +142,7 @@
             document.getElementById("welcome").style.display = "none";
             document.getElementById("sizesel").style.display = "block";
         }
-		
-				
+					
 		document.getElementById("runbtn").onclick = runIt;
 		
 		document.getElementById("gsize").onkeypress = function(evt){
@@ -151,7 +150,6 @@
 				runIt();
 			}
 		}
-	
 		
 		function makeBoard() {	
 			config.gameon = true;
@@ -229,6 +227,7 @@
                 comp = new makeFleet("Computer");
                 config.opp = comp.name;
                 document.getElementById("p2").innerHTML = config.opp;
+				compShips();
 			} else {
 			// send config.size to player 2 for their setup
                 peer.conn.send({
@@ -237,7 +236,36 @@
                 })
             }
 		}	
-
+		
+        function compShips() { 
+		// make computer fleet
+            for (a in comp.fleet) {
+                var boat = a;
+                var size = comp.fleet[boat].slots;
+                var tmp = trySpot(size, comp.fleet);
+                while (tmp.length == 0) {
+                    tmp = trySpot(size, comp.fleet);
+                }
+                comp.fleet[boat].coords = tmp;
+            }
+        }
+		
+        function trySpot(size, fleet) { 
+		//randomly generate coordinates to try to place ships 
+            var ori = ["v", "h"][Math.round(Math.random())],
+                poss = randCoord(),
+                col = poss[0],
+                num = Number(poss.slice(1));
+            return canPlace(col, num, size, ori, fleet);
+        }
+			
+        function randCoord() { 
+		// get a random coordinate from the available grid size
+            var clet = String.fromCharCode(Math.floor(Math.random() * config.size) + 65),
+                cnum = Math.floor(Math.random() * config.size) + 1;
+            return clet + cnum;
+        }
+		
         function setUp(dv) {
             document.getElementById(dv).style.gridTemplateColumns = "repeat(" + (config.size + 1) + "," + config.vcalc + "vw)";
             document.getElementById(dv).style.gridTemplateRows = "repeat(" + (config.size + 1) + "," + config.vcalc + "vw)";
@@ -347,7 +375,7 @@
 						document.getElementById("shipyd").style.display = "none";
 						document.getElementById("bombs").style.pointerEvents = "none";
                         if (config.plyrone) {
-                            if (config.p2ready) { 
+                            if (config.p2ready || comp) { 
 							// player 2 has already placed ships, or playing against computer, so ready to play 
                                 goPlayerOne();
                             } else {

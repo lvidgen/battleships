@@ -731,7 +731,7 @@
 				if(peer){
 					peer.conn.close();
 				}
-				location.href="https://www.google.com";
+				location.href="https://github.com/lvidgen/battleships";
 			} else {
 				document.getElementById("winlose").style.display = "none";
 				document.getElementById("replay").style.display = "block";

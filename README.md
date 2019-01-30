@@ -14,8 +14,8 @@ For testing purposes, there is a "cheat mode" checkbox at the bottom of the scre
 
 ### Player vs Player:
 This mode uses websockets and HTML5's Real Time Communication protocol. 
-The initial connection is brokered through the open source [PeerJS cloud server](https://peerjs.com)
-Once the connection is made, no peer-to-peer data passes through the server - WebRTC aloows direct communication between browsers. 
+The initial connection is brokered through the open source [PeerJS cloud server](https://peerjs.com).
+Once the connection is made, no peer-to-peer data passes through the server - WebRTC allows direct communication between browsers. 
 
 The two players can use separate tabs of the same browser, separate windows or separate PCs
 An internet connection is required for the two pages to talk to each other but the files can be run locally (on the hard drive, etc) without uploading to the server.

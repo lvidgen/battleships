@@ -24,5 +24,5 @@ For an initial connction to be made, one player needs to pass their Peer-generat
 
 ## Browser compatibility
 Chrome and Firefox work perfectly. Microsoft Edge handles One Player mode OK but doesn't seem capable of making a correct WebSocket connection for two player. 
-Internet Explorer fails as expecteed, both on modern JS and CSS.
+Internet Explorer fails as expected, both on modern JS and CSS.
 
